@@ -1,0 +1,39 @@
+name: Publish NuGet
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: nuget
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Check release version
+        shell: bash
+        run: |
+          version=$(dotnet msbuild src/AinbFormat/AinbFormat.csproj -getProperty:Version)
+          test "$GITHUB_REF_NAME" = "v$version"
+      - name: Run source-only tests
+        run: dotnet run --project tests/AinbFormat.Tests -c Release
+      - name: Pack
+        run: dotnet pack src/AinbFormat -c Release -o artifacts/feed -p:ContinuousIntegrationBuild=true
+      - name: Sign in to NuGet
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ vars.NUGET_USER }}
+      - name: Publish
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: dotnet nuget push "artifacts/feed/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json
