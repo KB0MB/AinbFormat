@@ -6,8 +6,8 @@ The library reads and writes decompressed AINB bytes. It does not merge mods,
 open ROMFS, unpack SARC, decompress Zstandard, or update resource-size tables.
 Those jobs belong to the caller. There is no Python or Rust runtime dependency.
 
-The first package candidate is `0.1.0-alpha.1`. It has been built locally but
-has not been published. It is not a complete replacement for a general AINB editor.
+The first prerelease, [0.1.0-alpha.1](https://www.nuget.org/packages/AinbFormat/0.1.0-alpha.1),
+is available on NuGet. It is not a complete replacement for a general AINB editor.
 
 ## Use
 
